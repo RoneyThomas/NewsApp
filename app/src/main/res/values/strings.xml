@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Gurdian Android News</string>
+    <string name="network_error">Check you network connection.</string>
+</resources>
