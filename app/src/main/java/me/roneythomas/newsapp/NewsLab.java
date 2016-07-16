@@ -1,16 +1,14 @@
 package me.roneythomas.newsapp;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -20,9 +18,9 @@ public class NewsLab {
     private static NewsLab sNewsLab;
     private ArrayList<News> mNewsArrayList;
 
-    private NewsLab(Context context) throws ExecutionException, InterruptedException {
+    private NewsLab() throws ExecutionException, InterruptedException {
         mNewsArrayList = new ArrayList<>();
-        JSONObject resultJSON = new getNews().execute("http://content.guardianapis.com/search?page=1&q=android&api-key=test").get();
+        JSONObject resultJSON = new GetNews().execute("http://content.guardianapis.com/search?page=1&q=android&api-key=test").get();
         try {
             if (resultJSON.getJSONObject("response").getString("status").equals("ok")) {
                 JSONArray newsJSONlist = resultJSON.getJSONObject("response").getJSONArray("results");
@@ -37,9 +35,9 @@ public class NewsLab {
         }
     }
 
-    public static NewsLab getInstance(Context context) throws ExecutionException, InterruptedException {
+    public static NewsLab getInstance() throws ExecutionException, InterruptedException {
         if (sNewsLab == null) {
-            sNewsLab = new NewsLab(context);
+            sNewsLab = new NewsLab();
         }
         return sNewsLab;
     }
@@ -48,7 +46,7 @@ public class NewsLab {
         return mNewsArrayList;
     }
 
-    private class getNews extends AsyncTask<String, Void, JSONObject> {
+    private class GetNews extends AsyncTask<String, Void, JSONObject> {
 
         @Override
         protected JSONObject doInBackground(String... strings) {
@@ -62,24 +60,21 @@ public class NewsLab {
 
                 urlConnection.connect();
                 if (urlConnection.getResponseCode() == 200) {
-                    int len = 6000;
-                    InputStream inputStream = urlConnection.getInputStream();
-                    String inputString = inputString(inputStream, len);
-                    return new JSONObject(inputString);
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+
+                    StringBuffer buffer = new StringBuffer();
+                    String line;
+                    while((line = bufferedReader.readLine())!=null){
+                        buffer.append(line);
+                    }
+                    bufferedReader.close();
+                    return new JSONObject(String.valueOf(buffer));
                 }
                 return null;
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
             return null;
-        }
-
-        private String inputString(InputStream inputStream, int len) throws IOException {
-            Reader reader = null;
-            reader = new InputStreamReader(inputStream, "UTF-8");
-            char[] buffer = new char[len];
-            reader.read(buffer);
-            return new String(buffer);
         }
     }
 }

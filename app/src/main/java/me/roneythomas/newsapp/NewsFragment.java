@@ -43,7 +43,7 @@ public class NewsFragment extends ListFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         try {
-            newsArrayList = NewsLab.getInstance(getContext()).getNews();
+            newsArrayList = NewsLab.getInstance().getNews();
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -59,12 +59,11 @@ public class NewsFragment extends ListFragment {
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
-            View listItemView = convertView;
-            if (listItemView == null) {
-                listItemView = LayoutInflater.from(getContext()).inflate(R.layout.list_item_layout, parent, false);
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_item_layout, parent, false);
             }
 
-            listItemView.setOnClickListener(new View.OnClickListener() {
+            convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -73,12 +72,12 @@ public class NewsFragment extends ListFragment {
                 }
             });
 
-            TextView title_text_view = (TextView) listItemView.findViewById(R.id.news_heading);
+            TextView title_text_view = (TextView) convertView.findViewById(R.id.news_heading);
             title_text_view.setText(newsArrayList.get(position).getTitle());
 
-            TextView section_text_view = (TextView) listItemView.findViewById(R.id.section_name);
+            TextView section_text_view = (TextView) convertView.findViewById(R.id.section_name);
             section_text_view.setText(newsArrayList.get(position).getSectionName());
-            return listItemView;
+            return convertView;
         }
     }
 }
